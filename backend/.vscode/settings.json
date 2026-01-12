@@ -1,0 +1,6 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.project.sourcePaths": [
+        "auth/src/main/java/com/marketplace/auth/services"
+    ]
+}
