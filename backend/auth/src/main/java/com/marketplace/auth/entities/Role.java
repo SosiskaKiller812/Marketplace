@@ -6,11 +6,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
 @Table(name = "roles")
 @Entity
 public class Role {
@@ -21,4 +21,13 @@ public class Role {
 
     @Column(unique = true)
     private String name;
+
+    public Role(String name){
+        this.name = name;
+    }
+
+    @Override
+    public String toString(){
+        return name;
+    }
 }

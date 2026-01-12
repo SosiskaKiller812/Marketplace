@@ -1,5 +1,6 @@
 package com.marketplace.auth.services;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
@@ -23,6 +24,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 
+//ДОДЕЛАТЬ EXPIRATION 
 @Service
 @Slf4j
 public class JwtService {
@@ -36,8 +38,11 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration}")
-    private Long expiration;
+    @Value("${jwt.refresh.expiration}")
+    private Long refreshExpiration;
+
+    @Value("${jwt.access.expiration}")
+    private Long accessExpiration;
 
     public JwtService(TokenRepository tokenRepository) {
         signingKey = getSignKey();
@@ -49,7 +54,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(UserDetails userDetails) {
+    private String generateToken(UserDetails userDetails, Long expiration) {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
@@ -61,6 +66,14 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(signingKey)
                 .compact();
+    }
+
+    public String generateAccessToken(UserDetails userDetails) {
+        return generateToken(userDetails, accessExpiration);
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return generateToken(userDetails, refreshExpiration);
     }
 
     public boolean validateToken(String token) {
@@ -114,7 +127,17 @@ public class JwtService {
 
     public List<String> extractRoles(String token) {
         Claims claims = extractAllClaims(token);
-        return claims.get(ROLES_CLAIM, List.class);
+        Object rolesObj = claims.get(ROLES_CLAIM);
+        
+        if (rolesObj instanceof List) {
+            return ((List<?>) rolesObj).stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
+
     }
 
     public boolean isExpired(String token) {

@@ -23,4 +23,10 @@ public class Token {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    public Token(String token, boolean loggedOut, User user){
+        this.refreshToken = token;
+        this.loggedOut = loggedOut;
+        this.user = user;
+    }
 }

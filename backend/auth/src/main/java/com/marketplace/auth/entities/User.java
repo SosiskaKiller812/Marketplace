@@ -49,10 +49,11 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
 
-    public User(String name, String email, String password) {
+    public User(String name, String email, String password, Set<Role> roles) {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.roles = roles;
     }
 
 }
