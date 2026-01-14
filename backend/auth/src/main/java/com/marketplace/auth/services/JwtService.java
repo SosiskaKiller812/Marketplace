@@ -22,18 +22,18 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
-//ДОДЕЛАТЬ EXPIRATION 
 @Service
 @Slf4j
 public class JwtService {
 
     private static final String ROLES_CLAIM = "roles";
 
-    private final SecretKey signingKey;
+    private SecretKey signingKey;
 
-    private TokenRepository tokenRepository;
+    private final TokenRepository tokenRepository;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -45,8 +45,12 @@ public class JwtService {
     private Long accessExpiration;
 
     public JwtService(TokenRepository tokenRepository) {
-        signingKey = getSignKey();
         this.tokenRepository = tokenRepository;
+    }
+
+    @PostConstruct
+    public void init() {
+        signingKey = getSignKey();
     }
 
     private SecretKey getSignKey() {
@@ -128,7 +132,7 @@ public class JwtService {
     public List<String> extractRoles(String token) {
         Claims claims = extractAllClaims(token);
         Object rolesObj = claims.get(ROLES_CLAIM);
-        
+
         if (rolesObj instanceof List) {
             return ((List<?>) rolesObj).stream()
                     .filter(String.class::isInstance)

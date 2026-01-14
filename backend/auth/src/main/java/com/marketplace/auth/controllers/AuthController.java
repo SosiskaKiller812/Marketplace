@@ -16,6 +16,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 @AllArgsConstructor
 @RequestMapping("/auth")
@@ -26,7 +28,7 @@ public class AuthController {
 
         @PostMapping("/signup")
         public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
-                if (userRepository.existsByUsername(registerRequest.getName())) {
+                if (userRepository.existsByName(registerRequest.getName())) {
                         return ResponseEntity.badRequest().body("Имя пользователя уже занято");
                 }
 
@@ -56,5 +58,11 @@ public class AuthController {
         public ResponseEntity<?> logoutUser() {
                 return ResponseEntity.status(501).body("NEED TO DO");
         }
+
+        @GetMapping("/get")
+        public String getMethodName() {
+            return new String("HYU");
+        }
+        
 
 }

@@ -37,7 +37,7 @@ public class LogoutHandlerImpl implements LogoutHandler {
             tokenEntity.setLoggedOut(true);
             tokenRepository.save(tokenEntity);
         }
-        
+
         SecurityContextHolder.clearContext();
     }
 

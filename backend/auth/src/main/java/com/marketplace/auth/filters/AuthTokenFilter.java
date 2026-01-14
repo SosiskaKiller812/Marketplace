@@ -1,4 +1,4 @@
-package com.marketplace.auth.configurations;
+package com.marketplace.auth.filters;
 
 import java.io.IOException;
 
@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.marketplace.auth.services.JwtService;
@@ -21,13 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @AllArgsConstructor
+@Component
 public class AuthTokenFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
     private static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
 
-    private JwtService jwtService;
-    private UserDetailsServiceImpl userDetailsService;
+    private final JwtService jwtService;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
