@@ -37,7 +37,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String authHeader = request.getHeader("Authorization");
-
+            
             if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
                 filterChain.doFilter(request, response);
                 return;
@@ -47,11 +47,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
             if (jwtService.validateToken(jwt)) {
                 String username = jwtService.extractUsername(jwt);
-
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                    if (jwtService.isAccessTokenValid(username, userDetails)) {
+                    if (jwtService.isAccessTokenValid(jwt, userDetails)) {
                         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 null,
@@ -61,6 +60,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
+                    System.out.println("access ne valid");
                 }
 
             }

@@ -21,6 +21,7 @@ import com.marketplace.auth.entities.Request.RegisterRequest;
 import com.marketplace.auth.entities.Response.AuthenticationResponse;
 import com.marketplace.auth.entities.Response.UserResponse;
 import com.marketplace.auth.mappers.UserMapper;
+import com.marketplace.auth.repositories.RoleRepository;
 import com.marketplace.auth.repositories.TokenRepository;
 import com.marketplace.auth.repositories.UserRepository;
 
@@ -34,23 +35,28 @@ public class AuthService {
 
     private final TokenRepository tokenRepository;
 
+    private final UserRepository userRepository;
+
+    private final RoleRepository roleRepository;
+
     private final AuthenticationManager authenticationManager;
 
     private final JwtService jwtService;
-
-    private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
 
     private final UserMapper userMapper;
 
     public UserResponse register(RegisterRequest registerRequest) {
+
+        Role role = roleRepository.findByName("USER").orElseThrow();
+
         User newUser = new User(
                 registerRequest.getName(),
                 registerRequest.getEmail(),
                 passwordEncoder.encode(registerRequest.getPassword()),
-                Set.of(new Role("USER")));
-
+                Set.of(role));
+        
         userRepository.save(newUser);
 
         return userMapper.toUserResponse(newUser);

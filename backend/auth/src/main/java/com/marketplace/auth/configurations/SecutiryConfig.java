@@ -42,14 +42,16 @@ public class SecutiryConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.BAD_REQUEST))
                         .accessDeniedHandler(accessDeniedHandlerImpl))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/get/**").hasAuthority("ADMIN")
-                        .requestMatchers("/auth/**").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/auth/signup", "/auth/signin", "/auth/refresh").permitAll()
+                        .requestMatchers("/auth/logout").authenticated()
+                        .requestMatchers("/auth/admin/**").hasAuthority("ADMIN")
+                        .anyRequest().authenticated()
+                )
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .addLogoutHandler(logoutHandlerImpl)
