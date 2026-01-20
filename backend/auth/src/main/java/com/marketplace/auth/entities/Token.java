@@ -23,15 +23,12 @@ public class Token {
 
     private String refreshToken;
 
-    private boolean loggedOut;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Token(String token, boolean loggedOut, User user){
+    public Token(String token, User user){
         this.refreshToken = token;
-        this.loggedOut = loggedOut;
         this.user = user;
     }
 }

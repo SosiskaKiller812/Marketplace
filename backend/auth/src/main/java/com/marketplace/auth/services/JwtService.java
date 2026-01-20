@@ -13,8 +13,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import com.marketplace.auth.repositories.TokenRepository;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -33,8 +31,6 @@ public class JwtService {
 
     private SecretKey signingKey;
 
-    private final TokenRepository tokenRepository;
-
     @Value("${jwt.secret}")
     private String secret;
 
@@ -44,8 +40,7 @@ public class JwtService {
     @Value("${jwt.access.expiration}")
     private Long accessExpiration;
 
-    public JwtService(TokenRepository tokenRepository) {
-        this.tokenRepository = tokenRepository;
+    public JwtService() {
     }
 
     @PostConstruct
@@ -164,8 +159,6 @@ public class JwtService {
 
         boolean isExpired = isExpired(token);
 
-        boolean isLoggedOut = tokenRepository.findByRefreshToken(token).map(t -> t.isLoggedOut()).orElse(false);
-
-        return isUserValid && !isExpired && !isLoggedOut;
+        return isUserValid && !isExpired;
     }
 }

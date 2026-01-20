@@ -1,5 +1,6 @@
 package com.marketplace.auth.handlers;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -23,7 +24,7 @@ public class LogoutHandlerImpl implements LogoutHandler {
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
             return;
@@ -34,8 +35,7 @@ public class LogoutHandlerImpl implements LogoutHandler {
         Token tokenEntity = tokenRepository.findByRefreshToken(refreshToken).orElse(null);
 
         if (tokenEntity != null) {
-            tokenEntity.setLoggedOut(true);
-            tokenRepository.save(tokenEntity);
+            tokenRepository.delete(tokenEntity);
         }
 
         SecurityContextHolder.clearContext();

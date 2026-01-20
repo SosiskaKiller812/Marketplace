@@ -2,6 +2,7 @@ package com.marketplace.auth.filters;
 
 import java.io.IOException;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,8 +37,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            String authHeader = request.getHeader("Authorization");
-            
+            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
             if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
                 filterChain.doFilter(request, response);
                 return;
@@ -60,7 +61,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
-                    System.out.println("access ne valid");
                 }
 
             }
