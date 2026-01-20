@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.marketplace.auth.filters.AuthTokenFilter;
 import com.marketplace.auth.handlers.AccessDeniedHandlerImpl;
 import com.marketplace.auth.handlers.LogoutHandlerImpl;
+import com.marketplace.auth.services.UserDetailsServiceImpl;
 
 import lombok.AllArgsConstructor;
 
@@ -29,7 +29,7 @@ import lombok.AllArgsConstructor;
 @Configuration
 @EnableMethodSecurity
 public class SecutiryConfig {
-    private final UserDetailsService userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
 
     private final AuthTokenFilter authTokenFilter;
 
@@ -37,26 +37,23 @@ public class SecutiryConfig {
 
     private final LogoutHandlerImpl logoutHandlerImpl;
 
-    // @Bean
-    // public AuthTokenFilter authenticationJwtTokenFilter() {
-    // return new AuthTokenFilter();
-    // }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.BAD_REQUEST))
                         .accessDeniedHandler(accessDeniedHandlerImpl))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/**").hasAuthority("ADMIN")
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/auth/signup", "/auth/signin", "/auth/refresh").permitAll()
+                        .requestMatchers("/auth/logout").authenticated()
+                        .requestMatchers("/auth/admin/**").hasAuthority("ADMIN")
+                        .anyRequest().authenticated()
+                )
                 .logout(logout -> logout
-                        .logoutUrl("/api/auth/logout")
+                        .logoutUrl("/auth/logout")
                         .addLogoutHandler(logoutHandlerImpl)
                         .logoutSuccessHandler((request, response, authentication) -> {
                             SecurityContextHolder.clearContext();

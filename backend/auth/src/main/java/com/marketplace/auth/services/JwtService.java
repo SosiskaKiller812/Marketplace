@@ -1,5 +1,6 @@
 package com.marketplace.auth.services;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
@@ -12,8 +13,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import com.marketplace.auth.repositories.TokenRepository;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -21,6 +20,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -29,19 +29,23 @@ public class JwtService {
 
     private static final String ROLES_CLAIM = "roles";
 
-    private final SecretKey signingKey;
-
-    private TokenRepository tokenRepository;
+    private SecretKey signingKey;
 
     @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration}")
-    private Long expiration;
+    @Value("${jwt.refresh.expiration}")
+    private Long refreshExpiration;
 
-    public JwtService(TokenRepository tokenRepository) {
+    @Value("${jwt.access.expiration}")
+    private Long accessExpiration;
+
+    public JwtService() {
+    }
+
+    @PostConstruct
+    public void init() {
         signingKey = getSignKey();
-        this.tokenRepository = tokenRepository;
     }
 
     private SecretKey getSignKey() {
@@ -49,7 +53,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(UserDetails userDetails) {
+    private String generateToken(UserDetails userDetails, Long expiration) {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
@@ -61,6 +65,14 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(signingKey)
                 .compact();
+    }
+
+    public String generateAccessToken(UserDetails userDetails) {
+        return generateToken(userDetails, accessExpiration);
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return generateToken(userDetails, refreshExpiration);
     }
 
     public boolean validateToken(String token) {
@@ -114,15 +126,26 @@ public class JwtService {
 
     public List<String> extractRoles(String token) {
         Claims claims = extractAllClaims(token);
-        return claims.get(ROLES_CLAIM, List.class);
+        Object rolesObj = claims.get(ROLES_CLAIM);
+
+        if (rolesObj instanceof List) {
+            return ((List<?>) rolesObj).stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
+
     }
 
     public boolean isExpired(String token) {
-        return !extractExpiration(token).before(new Date());
+        return extractExpiration(token).before(new Date());
     }
 
     public boolean isAccessTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
+
         boolean isUserValid = username.equals(userDetails.getUsername());
 
         boolean isExpired = isExpired(token);
@@ -136,8 +159,6 @@ public class JwtService {
 
         boolean isExpired = isExpired(token);
 
-        boolean isLoggedOut = tokenRepository.findByRefreshToken(token).map(t -> t.isLoggedOut()).orElse(false);
-
-        return isUserValid && !isExpired && !isLoggedOut;
+        return isUserValid && !isExpired;
     }
 }

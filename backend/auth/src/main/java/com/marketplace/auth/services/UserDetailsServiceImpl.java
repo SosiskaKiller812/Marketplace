@@ -3,6 +3,7 @@ package com.marketplace.auth.services;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 import com.marketplace.auth.entities.User;
 import com.marketplace.auth.entities.UserDetailsImpl;
@@ -12,6 +13,7 @@ import com.marketplace.auth.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
+@Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -21,7 +23,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByName(username).orElseThrow(
                 () -> new UserNotFoundException(username));
 
-        return UserDetailsImpl.build(user);
+        return new UserDetailsImpl(user);
     }
 
 }
