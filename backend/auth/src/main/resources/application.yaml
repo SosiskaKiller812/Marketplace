@@ -1,0 +1,28 @@
+server:
+    port: 8081
+
+spring:
+    application:
+        name: auth-service
+
+    jpa:
+        hibernate:
+            ddl-auto: update
+
+    datasource:
+        url: jdbc:postgresql://localhost:5432/users
+        username: postgres
+        password: password
+
+
+jwt:
+    refresh:
+        expiration: 604800000   # 7 дней
+
+    access:
+        expiration: 900000    # 15 минут 
+
+    private-path: classpath:jwt/private.pem
+    public-path: classpath:jwt/public.pem
+
+    

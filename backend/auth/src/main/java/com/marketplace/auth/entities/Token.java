@@ -1,5 +1,6 @@
 package com.marketplace.auth.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,13 +22,14 @@ public class Token {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "TEXT", name ="refresh_token")
     private String refreshToken;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Token(String token, User user){
+    public Token(String token, User user) {
         this.refreshToken = token;
         this.user = user;
     }
