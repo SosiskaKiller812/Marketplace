@@ -1,25 +1,26 @@
 package com.marketplace.auth.services;
 
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.crypto.SecretKey;
-
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import com.marketplace.auth.parsers.RSAKeyParser;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,10 +30,7 @@ public class JwtService {
 
     private static final String ROLES_CLAIM = "roles";
 
-    private SecretKey signingKey;
-
-    @Value("${jwt.secret}")
-    private String secret;
+    private final RSAKeyParser keyParser;
 
     @Value("${jwt.refresh.expiration}")
     private Long refreshExpiration;
@@ -40,39 +38,51 @@ public class JwtService {
     @Value("${jwt.access.expiration}")
     private Long accessExpiration;
 
-    public JwtService() {
+    @Value("${jwt.private-path}")
+    private Resource privateKeyResource;
+
+    @Value("${jwt.public-path}")
+    private Resource publicKeyResource;
+
+    private RSAPrivateKey privateKey;
+
+    private RSAPublicKey publicKey;
+
+    public JwtService(RSAKeyParser rsaKeyParser) {
+        this.keyParser = rsaKeyParser;
     }
 
     @PostConstruct
-    public void init() {
-        signingKey = getSignKey();
+    public void init() throws Exception {
+        privateKey = keyParser.loadPrivate(privateKeyResource);
+        publicKey = keyParser.loadPublic(publicKeyResource);
     }
 
-    private SecretKey getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    private String generateToken(UserDetails userDetails, Long expiration) {
+    public String generateAccessToken(UserDetails userDetails) {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
         return Jwts.builder()
-                .claim(ROLES_CLAIM, roles)
                 .subject(userDetails.getUsername())
+                .claim(ROLES_CLAIM, roles)
+                .claim("typ", "ACCESS")
+                .issuer("auth-service")
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(signingKey)
+                .expiration(new Date(System.currentTimeMillis() + accessExpiration))
+                .signWith(privateKey, Jwts.SIG.RS256)
                 .compact();
     }
 
-    public String generateAccessToken(UserDetails userDetails) {
-        return generateToken(userDetails, accessExpiration);
-    }
-
     public String generateRefreshToken(UserDetails userDetails) {
-        return generateToken(userDetails, refreshExpiration);
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .claim("typ", "REFRESH")
+                .issuer("auth-service")
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + refreshExpiration))
+                .signWith(privateKey, Jwts.SIG.RS256)
+                .compact();
     }
 
     public boolean validateToken(String token) {
@@ -83,7 +93,7 @@ public class JwtService {
 
         try {
             Jwts.parser()
-                    .verifyWith(signingKey)
+                    .verifyWith(publicKey)
                     .build()
                     .parseSignedClaims(token);
             return true;
@@ -103,7 +113,7 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(signingKey)
+                .verifyWith(publicKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

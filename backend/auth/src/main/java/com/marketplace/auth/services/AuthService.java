@@ -84,6 +84,13 @@ public class AuthService {
         User user = userRepository.findByName(username)
                 .orElseThrow(() -> new UsernameNotFoundException("No user found"));
 
+        Token existingToken = tokenRepository.findByRefreshToken(incomingRefreshToken)
+                .orElseThrow(() -> new RuntimeException("Refresh token not found in database"));
+
+        if (!existingToken.getUser().equals(user)) {
+            throw new RuntimeException("Something went wrong with refreshToken and user");
+        }
+
         UserDetails userDetails = new UserDetailsImpl(user);
 
         if (jwtService.isRefreshTokenValid(incomingRefreshToken, userDetails)) {
