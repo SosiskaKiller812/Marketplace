@@ -24,8 +24,8 @@
 
 # Maven
 target/
-!**/src/main/**/target/
-!**/src/test/**/target/
+**/src/main/**/target/
+**/src/test/**/target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -36,10 +36,10 @@ buildNumber.properties
 .mvn/timing.properties
 
 # Maven Wrapper
-!mvnw
-!mvnw.cmd
-!.mvn/wrapper/maven-wrapper.properties
-!.mvn/wrapper/maven-wrapper.jar
+mvnw
+mvnw.cmd
+.mvn/wrapper/maven-wrapper.properties
+.mvn/wrapper/maven-wrapper.jar
 
 # IDE
 ## VS Code
