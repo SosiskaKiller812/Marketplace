@@ -12,11 +12,12 @@ import org.springframework.stereotype.Repository;
 import com.marketplace.product.entities.Category;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Integer>{
-    List<Category> findAll();
-    Optional<Category> findByName(String name);
-    @Query("SELECT c FROM Category c WHERE UPPER(c.name) IN:categories")
-    List<Category> findAllByName(@Param("categories") Collection<String> categories);
-    boolean existsByName(String name);
-    
+public interface CategoryRepository extends JpaRepository<Category, Integer> {
+  Optional<Category> findByName(String name);
+
+  @Query("SELECT c FROM Category c WHERE UPPER(c.name) IN:categories")
+  List<Category> findAllByName(@Param("categories") Collection<String> categories);
+
+  boolean existsByName(String name);
+
 }
