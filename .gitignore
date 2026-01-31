@@ -1,16 +1,16 @@
+# ========== MAVEN WRAPPER ==========
+.mvn/
+mvnw
+mvnw.cmd
+
+# ========== JAVA/MAVEN ==========
 # Compiled class files
 *.class
 
-# Log file
+# Log files
 *.log
 
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# Package files
 *.jar
 *.war
 *.nar
@@ -19,13 +19,8 @@
 *.tar.gz
 *.rar
 
-# Kotlin
-.kotlin
-
 # Maven
 target/
-**/src/main/**/target/
-**/src/test/**/target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -33,59 +28,29 @@ pom.xml.next
 release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
-.mvn/timing.properties
 
-# Maven Wrapper
-mvnw
-mvnw.cmd
-.mvn/wrapper/maven-wrapper.properties
-.mvn/wrapper/maven-wrapper.jar
-
-# IDE
-## VS Code
-.vscode/
-
-## IntelliJ IDEA
+# ========== IDE ==========
+# IntelliJ IDEA
 .idea/
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
 *.iws
 *.iml
 *.ipr
 
-## Eclipse
-.apt_generated
+# Eclipse
 .settings/
 .classpath
-.factorypath
 .project
+.factorypath
 .springBeans
 .sts4-cache
 .metadata
 bin/
 tmp/
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.loadpath
 
-## NetBeans
-/nbproject/private/
-/nbbuild/
-/nbdist/
-/.nb-gradle/
-/nbproject/project.properties
-/nbproject/project.xml
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-/dist/
+# VSCode
+.vscode/
 
-# OS
+# ========== OS ==========
 .DS_Store
 .DS_Store?
 ._*
@@ -94,10 +59,8 @@ build/
 ehthumbs.db
 Thumbs.db
 
-# Gradle Wrapper
-!gradle-wrapper.jar
-
-# Other
+# ========== DIFFERENT ==========
 *.swp
 *~
 *#
+*.bak
