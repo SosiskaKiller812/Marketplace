@@ -8,7 +8,7 @@ mvnw.cmd
 *.class
 
 # Log files
-*.log
+*.loggit
 
 # Package files
 *.jar
