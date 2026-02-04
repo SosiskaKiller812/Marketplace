@@ -86,7 +86,7 @@ public class JwtService {
     }
 
     public boolean validateToken(String token) {
-        if (token.isEmpty() || token == null) {
+        if (token.isBlank() || token == null) {
             log.warn("jwt is empty");
             return false;
         }

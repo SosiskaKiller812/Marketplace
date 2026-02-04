@@ -29,3 +29,6 @@ spring:
                     - Path=/api/products/**
                 filters:
                     - StripPrefix=1      
+
+jwt:
+    public-path: classpath:jwt/public.pem
