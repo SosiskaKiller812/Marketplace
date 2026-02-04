@@ -69,6 +69,7 @@ public class JwtAuthFilter implements GlobalFilter {
           .header("X-User-Roles", jwt.getClaimAsString("roles"))
           .build();
 
+      ServletHttp
       return chain.filter(exchange.mutate().request(request).build());
     } catch (JwtException e) {
       exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);

@@ -17,29 +17,29 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class RSAKeyParser {
 
-    public RSAPrivateKey loadPrivate(Resource resource) throws Exception {
-        String key = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+  public RSAPrivateKey loadPrivate(Resource resource) throws Exception {
+    String key = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
-        key = key.replaceAll("-----BEGIN (.*)-----", "")
-                .replaceAll("-----END (.*)-----", "")
-                .replaceAll("\\s+", "");
+    key = key.replaceAll("-----BEGIN (.*)-----", "")
+        .replaceAll("-----END (.*)-----", "")
+        .replaceAll("\\s+", "");
 
-        byte[] decoded = Base64.getDecoder().decode(key);
+    byte[] decoded = Base64.getDecoder().decode(key);
 
-        return (RSAPrivateKey) KeyFactory.getInstance("RSA")
-                .generatePrivate(new PKCS8EncodedKeySpec(decoded));
-    }
+    return (RSAPrivateKey) KeyFactory.getInstance("RSA")
+        .generatePrivate(new PKCS8EncodedKeySpec(decoded));
+  }
 
-    public RSAPublicKey loadPublic(Resource resource) throws Exception {
-        String key = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+  public RSAPublicKey loadPublic(Resource resource) throws Exception {
+    String key = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
-        key = key.replaceAll("-----BEGIN (.*)-----", "")
-                .replaceAll("-----END (.*)-----", "")
-                .replaceAll("\\s+", "");
+    key = key.replaceAll("-----BEGIN (.*)-----", "")
+        .replaceAll("-----END (.*)-----", "")
+        .replaceAll("\\s+", "");
 
-        byte[] decoded = Base64.getDecoder().decode(key);
+    byte[] decoded = Base64.getDecoder().decode(key);
 
-        return (RSAPublicKey) KeyFactory.getInstance("RSA")
-                .generatePublic(new X509EncodedKeySpec(decoded));
-    }
+    return (RSAPublicKey) KeyFactory.getInstance("RSA")
+        .generatePublic(new X509EncodedKeySpec(decoded));
+  }
 }

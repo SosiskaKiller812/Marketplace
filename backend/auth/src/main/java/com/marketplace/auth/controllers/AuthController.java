@@ -26,53 +26,53 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequestMapping("/auth")
 @RestController
 public class AuthController {
-    private final UserRepository userRepository;
-    private final AuthService authService;
+  private final UserRepository userRepository;
+  private final AuthService authService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        if (userRepository.existsByName(registerRequest.getName())) {
-            return ResponseEntity.badRequest().body("Имя пользователя уже занято");
-        }
-
-        if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            return ResponseEntity.badRequest().body("Email уже занят");
-        }
-
-        UserResponse userResponse = authService.register(registerRequest);
-
-        return ResponseEntity.status(200).body(userResponse);
+  @PostMapping("/signup")
+  public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+    if (userRepository.existsByUsername(registerRequest.getName())) {
+      return ResponseEntity.badRequest().body("Имя пользователя уже занято");
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok(authService.login(loginRequest));
+    if (userRepository.existsByEmail(registerRequest.getEmail())) {
+      return ResponseEntity.badRequest().body("Email уже занят");
     }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<AuthenticationResponse> refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response) {
+    UserResponse userResponse = authService.register(registerRequest);
 
-        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+    return ResponseEntity.status(200).body(userResponse);
+  }
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+  @PostMapping("/signin")
+  public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+    return ResponseEntity.ok(authService.login(loginRequest));
+  }
 
-        String refreshToken = authorizationHeader.substring(7);
-        return ResponseEntity.status(HttpStatus.OK).body(authService.refreshToken(refreshToken));
+  @PostMapping("/refresh")
+  public ResponseEntity<AuthenticationResponse> refreshToken(
+      HttpServletRequest request,
+      HttpServletResponse response) {
+
+    String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer")) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @GetMapping("/hello")
-    public ResponseEntity<String> hello() {
-        return ResponseEntity.ok("Hello User");
-    }
+    String refreshToken = authorizationHeader.substring(7);
+    return ResponseEntity.status(HttpStatus.OK).body(authService.refreshToken(refreshToken));
+  }
 
-    @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> helloA() {
-        return ResponseEntity.ok("Hello Admin");
-    }
+  @GetMapping("/hello")
+  public ResponseEntity<String> hello() {
+    return ResponseEntity.ok("Hello User");
+  }
+
+  @GetMapping("/admin")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<String> helloA() {
+    return ResponseEntity.ok("Hello Admin");
+  }
 
 }
