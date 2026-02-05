@@ -11,6 +11,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.marketplace.auth.entities.JwtPayload;
 import com.marketplace.auth.services.JwtService;
 import com.marketplace.auth.services.UserDetailsServiceImpl;
 
@@ -46,22 +47,21 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
       String jwt = authHeader.substring(BEARER_PREFIX_LENGTH);
 
-      if (jwtService.validateToken(jwt)) {
-        String username = jwtService.extractUsername(jwt);
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-          UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+      JwtPayload payload = jwtService.parse(jwt);
 
-          if (jwtService.isAccessTokenValid(jwt, userDetails)) {
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userDetails,
-                null,
-                userDetails.getAuthorities());
+      jwtService.validateAccessToken(payload);
 
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+      if (SecurityContextHolder.getContext().getAuthentication() == null) {
+        UserDetails userDetails = userDetailsService.loadUserById(payload.getId());
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-          }
-        }
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            userDetails,
+            null,
+            userDetails.getAuthorities());
+
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
       }
     } catch (Exception e) {
