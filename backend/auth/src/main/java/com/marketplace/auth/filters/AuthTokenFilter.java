@@ -40,6 +40,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     try {
       String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
+      log.info(authHeader);
+
       if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
         filterChain.doFilter(request, response);
         return;
