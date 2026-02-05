@@ -7,7 +7,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.marketplace.auth.repositories.UserRepository;
 import com.marketplace.auth.services.AuthService;
 import com.marketplace.auth.entities.Request.LoginRequest;
 import com.marketplace.auth.entities.Request.RegisterRequest;
@@ -26,18 +25,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequestMapping("/auth")
 @RestController
 public class AuthController {
-  private final UserRepository userRepository;
   private final AuthService authService;
 
   @PostMapping("/signup")
   public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
-    if (userRepository.existsByUsername(registerRequest.getName())) {
-      return ResponseEntity.badRequest().body("Имя пользователя уже занято");
-    }
-
-    if (userRepository.existsByEmail(registerRequest.getEmail())) {
-      return ResponseEntity.badRequest().body("Email уже занят");
-    }
 
     UserResponse userResponse = authService.register(registerRequest);
 
@@ -56,7 +47,7 @@ public class AuthController {
 
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer")) {
+    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) { 
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
