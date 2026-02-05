@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,7 +33,7 @@ public class User {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "username", unique = true)
+  @Column(name = "username", unique = true, nullable = false)
   private String username;
 
   @Column(name = "name")
@@ -54,11 +55,18 @@ public class User {
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private List<Token> tokens;
 
-  public User(String name, String email, String password, Set<Role> roles) {
-    this.name = name;
+  public User(String username, String email, String password, Set<Role> roles) {
+    this.username = username;
     this.email = email;
     this.password = password;
     this.roles = roles;
+  }
+
+  @PrePersist
+  private void onCreate() {
+    if (this.name == null || this.name.isBlank()) {
+      this.name = this.username;
+    }
   }
 
 }

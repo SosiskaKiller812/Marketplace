@@ -97,7 +97,7 @@ public class JwtService {
           .getPayload();
 
       return JwtPayload.builder()
-          .id(Long.parseLong(claims.getIssuer()))
+          .id(Long.parseLong(claims.getSubject()))
           .roles(getRolesFromClaims(claims))
           .type(claims.get(TYPE_CLAIM, String.class))
           .issuer(claims.getIssuer())
@@ -123,11 +123,12 @@ public class JwtService {
   }
 
   public void validateAccessToken(JwtPayload payload) {
-    if (ACCESS_TYPE.equals(payload.getType())) {
+    if (!ACCESS_TYPE.equals(payload.getType())) {
+      log.info(ACCESS_TYPE + "==" + payload.getType());
       throw new CustomJwtException("Invalid token type");
     }
 
-    if (SERVICE_NAME.equals(payload.getIssuer())) {
+    if (!SERVICE_NAME.equals(payload.getIssuer())) {
       throw new CustomJwtException("Invalid token issuer");
     }
 
@@ -137,11 +138,11 @@ public class JwtService {
   }
 
   public void validateRefreshToken(JwtPayload payload) {
-    if (REFRESH_TYPE.equals(payload.getType())) {
+    if (!REFRESH_TYPE.equals(payload.getType())) {
       throw new CustomJwtException("Invalid token type");
     }
 
-    if (SERVICE_NAME.equals(payload.getIssuer())) {
+    if (!SERVICE_NAME.equals(payload.getIssuer())) {
       throw new CustomJwtException("Invalid token issuer");
     }
 
