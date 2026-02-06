@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,18 +16,19 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
+import com.marketplace.gateway.config.GatewayProperty;
 import com.marketplace.gateway.parser.RSAKeyParser;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
-@AllArgsConstructor
+@Slf4j
 @Component
-public class JwtAuthFilter implements GlobalFilter {
+public class JwtAuthFilter implements GlobalFilter, Ordered {
 
   private static final String ROLES_CLAIM = "roles";
   private static final String TYPE_CLAIM = "typ";
@@ -34,26 +36,46 @@ public class JwtAuthFilter implements GlobalFilter {
   private static final String BEARER = "Bearer ";
   private static final String ISSUER = "AUTH-SERVICE";
 
+  private final List<String> publicPaths;
+
   private final RSAKeyParser keyParser;
 
-  @Value("${jwt.public-path}")
-  private Resource publicKeyResource;
+  private final Resource publicKeyResource;
 
   private RSAPublicKey publicKey;
 
+  public JwtAuthFilter(
+      RSAKeyParser keyParser,
+      GatewayProperty properties,
+      @Value("${jwt.public-path}") Resource publicKeyResource) {
+    this.keyParser = keyParser;
+    this.publicPaths = properties.getPublicPaths();
+    this.publicKeyResource = publicKeyResource;
+  }
+
   @PostConstruct
-  public void init() throws Exception {
-    publicKey = keyParser.loadPublic(publicKeyResource);
+  public void init() {
+    try {
+      publicKey = keyParser.loadPublic(publicKeyResource);
+    } catch (Exception exc) {
+      throw new RuntimeException("Public key not found");
+    }
   }
 
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
     String path = exchange.getRequest().getPath().value();
+    // log.info("CURRENT PATH: " + path);
+    // for (String pathS : publicPaths) {
+    //   log.info("'" + pathS + "'\n");
+    // }
 
-    // public endpoints need to fix
-    if (path.startsWith("/api/auth") || path.startsWith("/fallback")) {
+    if (publicPaths.stream().anyMatch(p -> path.startsWith(p))) {
+      log.info("public path");
       return chain.filter(exchange);
     }
+
+    // log.info("ne public path");
 
     String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
@@ -67,12 +89,16 @@ public class JwtAuthFilter implements GlobalFilter {
     try {
       Claims claims = Jwts.parser()
           .verifyWith(publicKey)
-          .requireIssuer("auth-service")
+          .requireIssuer(ISSUER)
           .build()
           .parseSignedClaims(token)
           .getPayload();
 
+      // log.info("\n----------------------------\nverified\n");
+
       validate(claims);
+
+      // log.info("\n-----------------------------\nvalidirovan");
 
       String userId = claims.getSubject();
       String roles = extractRoles(claims);
@@ -92,10 +118,6 @@ public class JwtAuthFilter implements GlobalFilter {
   private void validate(Claims claims) {
     if (!ACCESS_TYPE.equals(claims.get(TYPE_CLAIM, String.class))) {
       throw new JwtException("Invalid token type");
-    }
-
-    if(!ISSUER.equals(claims.getIssuer())){
-      throw new JwtException("Invalid issuer");
     }
 
     if (claims.getSubject() == null) {
@@ -118,5 +140,10 @@ public class JwtAuthFilter implements GlobalFilter {
     }
 
     return "";
+  }
+
+  @Override
+  public int getOrder() {
+    return -1;
   }
 }

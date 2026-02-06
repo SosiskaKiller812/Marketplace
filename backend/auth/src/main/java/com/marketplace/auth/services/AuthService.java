@@ -25,7 +25,9 @@ import com.marketplace.auth.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @AllArgsConstructor
 @Service
 public class AuthService {
@@ -90,13 +92,12 @@ public class AuthService {
 
   @Transactional
   public AuthenticationResponse refreshToken(String incomingRefreshToken) {
-
     JwtPayload payload = jwtService.parse(incomingRefreshToken);
 
     jwtService.validateRefreshToken(payload);
 
     User user = userRepository.findById(payload.getId())
-        .orElseThrow();
+        .orElseThrow(() -> new RuntimeException("User not found by id"));
 
     Token existingToken = tokenRepository.findByRefreshToken(incomingRefreshToken)
         .orElseThrow(() -> new RuntimeException("Refresh token not found in database"));

@@ -20,7 +20,6 @@ public class RSAKeyParser {
         .replaceAll("\\s+", "");
 
     byte[] decoded = Base64.getDecoder().decode(key);
-
     return (RSAPublicKey) KeyFactory.getInstance("RSA")
         .generatePublic(new X509EncodedKeySpec(decoded));
   }

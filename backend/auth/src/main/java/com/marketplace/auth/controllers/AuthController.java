@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.marketplace.auth.services.AuthService;
 import com.marketplace.auth.entities.Request.LoginRequest;
 import com.marketplace.auth.entities.Request.RegisterRequest;
-import com.marketplace.auth.entities.Response.AuthenticationResponse;
 import com.marketplace.auth.entities.Response.UserResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,14 +40,14 @@ public class AuthController {
   }
 
   @PostMapping("/refresh")
-  public ResponseEntity<AuthenticationResponse> refreshToken(
+  public ResponseEntity<?> refreshToken(
       HttpServletRequest request,
       HttpServletResponse response) {
 
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
     if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) { 
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect authorization header");
     }
 
     String refreshToken = authorizationHeader.substring(7);
