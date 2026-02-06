@@ -1,6 +1,7 @@
 package com.marketplace.auth.filters;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
@@ -11,6 +12,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.marketplace.auth.configurations.GatewayProperty;
 import com.marketplace.auth.entities.JwtPayload;
 import com.marketplace.auth.services.JwtService;
 import com.marketplace.auth.services.UserDetailsServiceImpl;
@@ -19,11 +21,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-@AllArgsConstructor
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
 
@@ -32,15 +30,28 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
   private final UserDetailsServiceImpl userDetailsService;
+  private final List<String> publicPaths;
+
+  public AuthTokenFilter(JwtService jwtService, UserDetailsServiceImpl userDetailsServiceImpl,
+      GatewayProperty properties) {
+    this.jwtService = jwtService;
+    this.userDetailsService = userDetailsServiceImpl;
+    this.publicPaths = properties.getPublicPaths();
+  }
 
   @Override
   protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
       @NonNull FilterChain filterChain)
       throws ServletException, IOException {
     try {
-      String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+      String path = request.getRequestURI();
 
-      log.info(authHeader);
+      if (publicPaths.stream().anyMatch(p -> path.startsWith(p))) {
+        filterChain.doFilter(request, response);
+        return;
+      }
+
+      String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
       if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
         filterChain.doFilter(request, response);
