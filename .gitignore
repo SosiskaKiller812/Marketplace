@@ -3,12 +3,9 @@
 mvnw
 mvnw.cmd
 
-# ========== JAVA/MAVEN ==========
-# Compiled class files
+# ========== JAVA / MAVEN BUILD ==========
+# Compiled classes
 *.class
-
-# Log files
-*.loggit
 
 # Package files
 *.jar
@@ -19,7 +16,7 @@ mvnw.cmd
 *.tar.gz
 *.rar
 
-# Maven
+# Maven build output
 target/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -29,14 +26,20 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 
+# ========== LOGS ==========
+*.log
+*.log.*
+logs/
+
 # ========== IDE ==========
-# IntelliJ IDEA
+## IntelliJ IDEA
 .idea/
 *.iws
 *.iml
 *.ipr
+out/
 
-# Eclipse
+## Eclipse
 .settings/
 .classpath
 .project
@@ -47,10 +50,15 @@ buildNumber.properties
 bin/
 tmp/
 
-# VSCode
+## Visual Studio Code
 .vscode/
+*.code-workspace
 
-# ========== OS ==========
+## NetBeans
+nb-configuration.xml
+nbactions.xml
+
+# ========== OS GENERATED FILES ==========
 .DS_Store
 .DS_Store?
 ._*
@@ -58,9 +66,54 @@ tmp/
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# ========== DIFFERENT ==========
+# ========== CONFIGURATION & SECRETS ==========
+## Local / environment-specific configuration (should not be committed)
+application-*.yml
+application-*.yaml
+application-*.properties
+.env
+*.env
+secrets/
+*.p12
+*.jks
+*.key
+
+## But keep the main application.yml (if exists) – uncomment if needed
+!application.yml
+!application.yaml
+!application.properties
+
+# ========== DATABASES ==========
+*.h2.db
+*.mv.db
+*.tracelog
+*.h2
+
+# ========== DOCKER / KUBERNETES ==========
+docker-compose.override.yml
+*.pid
+helm/charts/*/charts/
+helm/charts/*/requirements.lock
+helm/repositories.yaml
+helm/*/values.local.yaml
+
+# ========== TEMPORARY FILES ==========
+*.tmp
+*.temp
+*.bak
 *.swp
 *~
-*#
-*.bak
+\#*\#
+*.swo
+*.swn
+*.pid
+*.lock
+*.orig
+
+# ========== PROJECT SPECIFIC (optional) ==========
+## If you have any custom directories like /temp or /uploads in the root, add them
+temp/
+uploads/
+!uploads/.gitkeep

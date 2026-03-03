@@ -34,4 +34,10 @@ jwt:
     private-path: classpath:jwt/private.pem
     public-path: classpath:jwt/public.pem
 
-    
+kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: orderEvent:com.example.producer.event.OrderEvent

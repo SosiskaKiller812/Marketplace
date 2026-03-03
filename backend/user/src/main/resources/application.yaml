@@ -1,0 +1,18 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: user-service
+  # liquibase:
+  #   enabled: true
+  #   change-log: classpath:db/changelog/db.changelog-master.yaml
+  #   drop-first: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/users
+    username: postgres
+    password: password
