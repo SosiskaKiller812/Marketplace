@@ -1,8 +1,5 @@
 #  Marketplace Microservices
-<p align="center">
-  <img src="https://img.shields.io/badge/status-under%20development-yellow?style=flat-square" alt="Status"/>
-  <img src="https://img.shields.io/badge/release-pre--alpha-orange?style=flat-square" alt="Pre-alpha"/>
-</p>
+![Development Status](https://img.shields.io/badge/status-under%20development-yellow)
 
 > 🚧 **Heads up!** This project is under active development. APIs and data models may change without notice.
 
@@ -51,10 +48,7 @@ The project embraces a variety of proven design patterns to ensure clean, mainta
 | **API Gateway**    | Single entry point (`gateway`) routing requests to appropriate microservices.                           |
 | **Repository**     | Spring Data JPA repositories abstracting database access.                                              |
 | **Service Layer**  | Business logic encapsulated in `@Service` beans.                                                       |
-| **Factory**        | For creating complex objects (e.g., test fixtures, DTOs).                                              |
-| **Strategy**       | Used in pricing/discount calculations (e.g., different promotion strategies).                          |
 | **Observer/Event** | Spring `ApplicationEvent` for cross‑service communication (e.g., user registration → send email).      |
-| **CQRS**           | Lightweight separation of read and write models in some services (e.g., product search vs. management).|
 | **Singleton**      | Spring beans are singletons by default, ensuring efficient resource usage.                             |
 | **SOLID Principles**| Applied throughout – single responsibility, open/closed, etc.                                        |
 
@@ -71,7 +65,7 @@ Tokens include roles and custom claims, enabling fine‑grained authorization.
 
 ---
 
-## 🐳 Infrastructure & Deployment
+##  Infrastructure & Deployment
 
 All services are containerized with Docker. A `docker-compose.yml` at the root orchestrates the entire system:
 
@@ -79,7 +73,3 @@ All services are containerized with Docker. A `docker-compose.yml` at the root o
 - Liquibase runs automatically on startup to apply database migrations.
 - The **gateway** service exposes port `8180` and routes requests based on path prefixes (e.g., `/auth/**`, `/users/**`, `/products/**`).
 - The **BFF** service sits behind the gateway and provides aggregated APIs for the frontend.
-
-```bash
-# Start the whole platform
-docker-compose up -d
