@@ -1,5 +1,4 @@
 #  Marketplace Microservices
-![Development Status](https://img.shields.io/badge/status-under%20development-yellow)
 
 > 🚧 **Heads up!** This project is under active development. APIs and data models may change without notice.
 
